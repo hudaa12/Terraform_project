@@ -2,19 +2,19 @@ stages:
   - plan
 
 variables:
-  TF_BACKEND_BUCKET: "hudneb-bucket"  # Terraform backend bucket name
+  TF_BACKEND_BUCKET: "hudneb-bucket"  # Terraform backend bucket name.
 
 plan:
   stage: plan
   script:
-    - apt-get update && apt-get install -y terraform   # Install Terraform
+    - apt-get update && apt-get install -y terraform   # Install Terraform.
     - terraform init -backend-config="bucket=$TF_BACKEND_BUCKET"
     - terraform plan -out=tfplan
   only:
-    - merge_requests   # Run this job only on merge requests
+    - merge_requests   # Run this job only on merge requests.
   artifacts:
     paths:
-      - tfplan   # Terraform plan file available as an artifact for the next job
+      - tfplan   # Terraform plan file available as an artifact for the next job.
   when: manual
 deploy:
   stage: deploy
