@@ -4,13 +4,8 @@ on:
     branches:
       - main
   push:
-<<<<<<< HEAD
     branches:
       - main
-=======
-    branches: [main]
-
->>>>>>> 296a40a2ab4094a34c046103aefa393ac33bc1be
 jobs:
   terraform_plan:
     name: "Terraform Plan"
@@ -45,3 +40,4 @@ jobs:
         run: |
           terraform init
           terraform apply -auto-approve
+
