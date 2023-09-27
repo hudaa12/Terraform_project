@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket = "hudneb-bucket"
-    key    = "terraform/dev/state.tfstate"
+    key    = "terraform/dev/hudneb-state"
     region = "eu-west-2"
   }
 }
