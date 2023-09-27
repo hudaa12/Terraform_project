@@ -34,7 +34,7 @@ jobs:
     - name: Terraform Init
       id: init
       run: terraform init -backend-config="bucket=$TF_STATE_hudneb-state" -backend-config="region=eu-west-2"
-      Working-directory: ./terraform
+      working-directory: ./terraform
 
 
     # Checks that all Terraform configuration files adhere to a canonical format
