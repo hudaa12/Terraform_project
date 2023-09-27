@@ -1,16 +1,15 @@
 terraform {
   backend "s3" {
     bucket = "hudneb-bucket"
-    key    = "terraform/terraform.tfstate"
+    key    = "~/.aws/credentials"
     region = "eu-west-2"
   }
 }
 
 provider "aws" {
   region = "eu-west-2"
-  shared_credentials_files = "~/.aws/credentials"
   profile = "terraform"
-  access_key = "aws_access_key_2"
-  secret_key = "aws_secret_key_2"
+  aws_access_key = "aws_access_key_2"
+  aws_secret_key = "aws_secret_key_2"
 }
 
