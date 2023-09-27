@@ -1,135 +1,73 @@
-name: 'Terraform Plan/Apply'
+name: Terraform GitHub Actions
 
-on:
+on: 
   push:
-    branches:
-    - main
-  pull_request:
-    branches:
-    - main
-
-#These environment variables are used by the terraform AWS provider to setup OIDD authenticate. 
-env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_REGION: eu-west-2
+    branches: [master]
 
 jobs:
-  terraform-plan:
-    name: 'Terraform Plan'
+  Build:
     runs-on: ubuntu-latest
-
+    environment:
+      name: Staging
     steps:
-    # Checkout the repository to the GitHub Actions runner
-    - name: Checkout
+
+    - name: Check out repository
       uses: actions/checkout@v3
 
-    # Install the latest version of the Terraform CLI
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:  
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_wrapper: false
+      with: 
+        terraform_version: 1.4.4
 
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform init
       id: init
-      run: terraform init -backend-config="bucket=${TF_STATE_hudneb-bucket}" -backend-config="region=eu-west-2"
-      shell: /bin/zsh
-      # working-directory: /Terraform_project/Terraform_project/terraform
+      run: terraform init
 
+    - name: Terraform format
+      id: fmt
+      run: terraform fmt
 
-    # Checks that all Terraform configuration files adhere to a canonical format
-    # Will fail the build if not
-    - name: Terraform Format
-      run: terraform fmt -check
+    - name: Terraform validate
+      id: validate
+      run: terraform validate
 
-    # Generates an execution plan for Terraform
-    - name: Terraform Plan
+    - name: Terraform plan
       id: plan
-      run: |-
-        terraform plan \
-        -var="region=eu-west-2" \
-        # -var="public_key=$PUBLIC_SSH_KEY" \
-        # -var="private_key=$PRIVATE_SSH_KEY" \ 
-        # -var="key_name=deployer-key" \
-        -out=PLAN  
-      working-directory: ./terraform
+      run: terraform plan
 
-    # Save plan to artifacts  
-    # - name: Publish Terraform Plan
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: plan
-    #     path: plan
-        
-    # # Create string output of Terraform Plan
-    # - name: Create String Output
-    #   id: tf-plan-string
-    #   run: |
-    #     TERRAFORM_PLAN=$(terraform show -no-color tfplan)
-        
-    #     delimiter="$(openssl rand -hex 8)"
-    #     echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
-    #     echo "## Terraform Plan Output" >> $GITHUB_OUTPUT
-    #     echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
-    #     echo "" >> $GITHUB_OUTPUT
-    #     echo '```terraform' >> $GITHUB_OUTPUT
-    #     echo "$TERRAFORM_PLAN" >> $GITHUB_OUTPUT
-    #     echo '```' >> $GITHUB_OUTPUT
-    #     echo "</details>" >> $GITHUB_OUTPUT
-    #     echo "${delimiter}" >> $GITHUB_OUTPUT
-        
-    # # Publish Terraform Plan as task summary
-    # - name: Publish Terraform Plan to Task Summary
-    #   env:
-    #     SUMMARY: ${{ steps.tf-plan-string.outputs.summary }}
-    #   run: |
-    #     echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
-      
-    # # If this is a PR post the changes
-    # - name: Push Terraform Output to PR
-    #   if: github.ref != 'refs/heads/main'
-    #   uses: actions/github-script@v6
-    #   env:
-    #     SUMMARY: "${{ steps.tf-plan-string.outputs.summary }}"
-    #   with:
-    #       github-token: ${{ secrets.GITHUB_TOKEN }}
-    #       script: |
-    #         const body = `${process.env.SUMMARY}`;
-    #         github.rest.issues.createComment({
-    #             issue_number: context.issue.number,
-    #             owner: context.repo.owner,
-    #             repo: context.repo.repo,
-    #             body: body
-    #         })
-                
-    - name: Terraform Apply
-      id: apply
-    # if: github.ref == 'refs/heads/main' && needs.terraform-plan.outputs.tfplanExitCode == 2
-      run: terraform apply PLAN
-      working-directory: ./terraform
-    # environment: production
-    # needs: [terraform-plan]
+  Deploy:
+    needs: [Build]
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+    steps:
     
-    # steps:
-    # # Checkout the repository to the GitHub Actions runner
-    # - name: Checkout
-    #   uses: actions/checkout@v3
+    - name: Check out repository
+      uses: actions/checkout@v3
 
-    # # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
-    # - name: Setup Terraform
-    #   uses: hashicorp/setup-terraform@v2
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:  
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
 
-    # # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-    # - name: Terraform Init
-    #   run: terraform init
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with: 
+        terraform_version: 1.4.4
 
-    # # Download saved plan from artifacts  
-    # - name: Download Terraform Plan
-    #   uses: actions/download-artifact@v3
-    #   with:
-    #     name: tfplan
-
-    # # Terraform Apply
-    # - name: Terraform Apply
-    #   run: terraform apply -auto-approve tfplan
+    - name: Terraform init
+      id: init
+      run: terraform init
+    
+    - name: Terraform apply
+      id: apply
+      run: terraform apply -auto-approve
