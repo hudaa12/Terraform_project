@@ -10,7 +10,7 @@ provider "aws" {
   region = "eu-west-2"
   shared_credentials_files = "~/.aws/credentials"
   profile = "terraform"
-  access_key = var.aws_access_key_2
-  secret_key = var.aws_secret_key_2
+  access_key = "aws_access_key_2"
+  secret_key = "aws_secret_key_2"
 }
 
