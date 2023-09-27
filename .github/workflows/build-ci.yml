@@ -34,7 +34,7 @@ jobs:
     - name: Terraform Init
       id: init
       run: terraform init -backend-config="bucket=$TF_STATE_hudneb-state" -backend-config="region=eu-west-2"
-      shell: /bin/bash -e
+      shell: /bin/bash -e {0}
       working-directory: /home/runner/work/Terraform_project/Terraform_project/terraform
 
 
