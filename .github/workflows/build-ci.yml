@@ -8,7 +8,7 @@ on:
       - main
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.TERRAFORM_2 }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.TERRAFORM_SECRET_2 }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.TERRAFROM_SECRET_2 }}
 jobs:
   terraform:
     name: Plan / Apply
