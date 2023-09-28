@@ -7,9 +7,9 @@ terraform {
   }
   required_version = ">= 1.2.0"
   backend "s3" {
-    bucket = "a-terra-bucket"
-    key    = "terraform-state"
-    region = "eu-west-2"
+    bucket         = "a-terra-bucket"
+    key            = "terraform-state"
+    region         = "eu-west-2"
     dynamodb_table = "terra-table"
   }
 }
@@ -34,15 +34,15 @@ resource "aws_security_group" "a_secgroup" {
   vpc_id      = data.aws_vpc.default_vpc.id
   ingress {
     description = "TLS from VPC"
-    from_port         = 443
-    to_port           = 443
-    protocol          = "tcp"
-    cidr_blocks       = ["172.31.0.0/16"]
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["172.31.0.0/16"]
   }
   egress {
-    from_port         = 0
-    to_port           = 0
-    protocol          = "-1"
-    cidr_blocks       = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
