@@ -10,7 +10,7 @@ terraform {
     bucket         = "a-terra-bucket"
     key            = "terraform-state"
     region         = "eu-west-2"
-    dynamodb_table = "terra-table"
+    # dynamodb_table = "terra-table"
   }
 }
 provider "aws" {
