@@ -1,125 +1,52 @@
-# name: Terraform
-# on:
-#   pull_request:
-#     branches:
-#       - master
-#   push:
-#     branches:
-#       - master
-# env:
-#   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-# jobs:
-#   terraform:
-#     name: Plan / Apply
-#     runs-on: ubuntu-latest
-#     defaults:
-#       run:
-#         working-directory: terraform
-#     permissions:
-#       contents: read
-#       pull-requests: write
-#     steps:
-#     - name: Checkout
-#       uses: actions/checkout@v3
-#     - name: Use Terraform 1.5.7
-#       uses: hashicorp/setup-terraform@v2
-#       with:
-#         terraform_version: 1.5.7
-#     - name: Terraform Format
-#       id: fmt
-#       run: terraform fmt -check
-#       continue-on-error: true
-#     - name: Terraform Init
-#       id: init
-#       run: terraform init
-#       continue-on-error: true
-#     - name: Terraform Validate
-#       id: validate
-#       run: terraform validate -no-color
-#       continue-on-error: true
-#     - name: Terraform Plan
-#       id: plan
-#       if: github.event_name == 'pull_request'
-#       run: terraform plan -no-color -input=false
-#       continue-on-error: true
-#     - name: Terraform Status
-#       if: steps.plan.outcome == 'failure' || steps.validate.outcome == 'failure' || steps.init.outcome == 'failure' || steps.fmt.outcome == 'failure'
-#       run: exit 1
-#     - name: Terraform Apply
-#       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-#       run: terraform apply -auto-approve -input=false
-
-name: Terraform GitHub Actions
-
-on: 
+name: Terraform
+on:
+  pull_request:
+    branches:
+      - master
   push:
-    branches: [master]
-
+    branches:
+      - master
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 jobs:
-  Build:
+  terraform:
+    name: Plan / Apply
     runs-on: ubuntu-latest
-    environment:
-      name: Staging
+    defaults:
+      run:
+        working-directory: terraform
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
-
-    - name: Check out repository
+    - name: Checkout
       uses: actions/checkout@v3
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:  
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
-
-    - name: Setup Terraform
+    - name: Use Terraform 1.5.7
       uses: hashicorp/setup-terraform@v2
-      with: 
-        terraform_version: 1.4.4
-
-    - name: Terraform init
-      id: init
-      run: terraform init
-
-    - name: Terraform format
+      with:
+        terraform_version: 1.5.7
+    - name: Terraform Format
       id: fmt
-      run: terraform fmt
-
-    - name: Terraform validate
-      id: validate
-      run: terraform validate
-
-    - name: Terraform plan
-      id: plan
-      run: terraform plan
-
-  Deploy:
-    needs: [Build]
-    runs-on: ubuntu-latest
-    environment:
-      name: Production
-    steps:
-    
-    - name: Check out repository
-      uses: actions/checkout@v3
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:  
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
-
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with: 
-        terraform_version: 1.4.4
-
-    - name: Terraform init
+      run: terraform fmt -check
+      continue-on-error: true
+    - name: Terraform Init
       id: init
       run: terraform init
-    
-    - name: Terraform apply
-      id: apply
-      run: terraform apply -auto-approve
+      continue-on-error: true
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
+      continue-on-error: true
+    - name: Terraform Plan
+      id: plan
+      if: github.event_name == 'pull_request'
+      run: terraform plan -no-color -input=false
+      continue-on-error: true
+    - name: Terraform Status
+      if: steps.plan.outcome == 'failure' || steps.validate.outcome == 'failure' || steps.init.outcome == 'failure' || steps.fmt.outcome == 'failure'
+      run: exit 1
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: terraform apply -auto-approve -input=false
+
