@@ -7,10 +7,9 @@ terraform {
   }
   required_version = ">= 1.2.0"
   backend "s3" {
-    bucket         = "a-terra-bucket"
-    key            = "terraform-state"
-    region         = "eu-west-2"
-    # dynamodb_table = "terra-table"
+    bucket = "a-terra-bucket"
+    key    = "terraform-state"
+    region = "eu-west-2"
   }
 }
 provider "aws" {
