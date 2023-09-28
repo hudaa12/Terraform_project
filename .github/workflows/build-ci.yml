@@ -35,7 +35,7 @@ jobs:
       run: echo "the bug" && echo $AWS_ACCESS_KEY_ID && echo $AWS_SECRET_ACCESS_KEY && terraform init
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.TERRAFORM_2 }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.TERRAFORM_SECRET_2 }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.TERRAFROM_SECRET_2 }}
       continue-on-error: true
     - name: Terraform Validate
       id: validate
