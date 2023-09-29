@@ -1,0 +1,54 @@
+name: Terraform
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.TERRAFORM_2 }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.TERRAFROM_SECRET_2 }}
+jobs:
+  terraform:
+    name: Plan / Apply
+    runs-on: ubuntu-latest
+    # defaults:
+    #   run:
+    #     working-directory: Terraform_project/terraform
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Use Terraform 1.5.7
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.7
+    - name: Terraform Format
+      id: fmt
+      run: terraform fmt -check
+      continue-on-error: true
+    - name: Terraform Init
+      id: init
+      run: echo "the bug" && echo $AWS_ACCESS_KEY_ID && echo $AWS_SECRET_ACCESS_KEY && terraform init
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.TERRAFORM_2 }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.TERRAFROM_SECRET_2 }}
+      continue-on-error: true
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
+      continue-on-error: true
+    - name: Terraform Plan
+      id: plan
+      if: github.event_name == 'pull_request'
+      run: terraform plan -no-color -input=false
+      continue-on-error: true
+    # - name: Terraform Status
+    #   if: steps.plan.outcome == 'failure' || steps.validate.outcome == 'failure' || steps.init.outcome == 'failure' || steps.fmt.outcome == 'failure'
+    #   run: exit 1
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: terraform apply -auto-approve -input=false
